@@ -307,8 +307,8 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
     :type type: str
     :param mount_path: Required. The mount path of the persistent disk.
     :type mount_path: str
-    :param read_only: Indicates whether the persistent disk is a readOnly one.
-    :type read_only: bool
+    :param readonly: Indicates whether the persistent disk is a readonly one.
+    :type readonly: bool
     :param mount_options: These are the mount options for a persistent disk.
     :type mount_options: list[str]
     """
@@ -321,7 +321,7 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
         'mount_path': {'key': 'mountPath', 'type': 'str'},
-        'read_only': {'key': 'readOnly', 'type': 'bool'},
+        'readonly': {'key': 'readonly', 'type': 'bool'},
         'mount_options': {'key': 'mountOptions', 'type': '[str]'},
     }
 
@@ -336,7 +336,7 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
         super(CustomPersistentDiskProperties, self).__init__(**kwargs)
         self.type = None  # type: Optional[str]
         self.mount_path = kwargs['mount_path']
-        self.read_only = kwargs.get('read_only', None)
+        self.readonly = kwargs.get('readonly', None)
         self.mount_options = kwargs.get('mount_options', None)
 
 
@@ -350,8 +350,8 @@ class AzureFileVolume(CustomPersistentDiskProperties):
     :type type: str
     :param mount_path: Required. The mount path of the persistent disk.
     :type mount_path: str
-    :param read_only: Indicates whether the persistent disk is a readOnly one.
-    :type read_only: bool
+    :param readonly: Indicates whether the persistent disk is a readonly one.
+    :type readonly: bool
     :param mount_options: These are the mount options for a persistent disk.
     :type mount_options: list[str]
     :param share_name: Required. The share name of the Azure File share.
@@ -367,7 +367,7 @@ class AzureFileVolume(CustomPersistentDiskProperties):
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
         'mount_path': {'key': 'mountPath', 'type': 'str'},
-        'read_only': {'key': 'readOnly', 'type': 'bool'},
+        'readonly': {'key': 'readonly', 'type': 'bool'},
         'mount_options': {'key': 'mountOptions', 'type': '[str]'},
         'share_name': {'key': 'shareName', 'type': 'str'},
     }

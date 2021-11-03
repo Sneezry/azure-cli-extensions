@@ -911,7 +911,7 @@ def app_unset_deployment(cmd, client, resource_group, service, name):
     return client.apps.begin_update(resource_group, service, name, app_resource)
 
 
-def app_append_loaded_public_certificate(cmd, client, resource_group, service, name, certificate_name, load_trust_store):
+def app_append_loaded_public_certificate(cmd, client, resource_group, service, name, certificate_name, load_trust_store, models=None):
     app_resource = client.apps.get(resource_group, service, name)
     certificate_resource = client.certificates.get(resource_group, service, certificate_name)
     certificate_resource_id = certificate_resource.id
@@ -925,7 +925,7 @@ def app_append_loaded_public_certificate(cmd, client, resource_group, service, n
         if loaded_certificate.resource_id == certificate_resource.id:
             raise ClientRequestError("This certificate has already been loaded.")
 
-    loaded_certificates.append(models_20210901preview.
+    loaded_certificates.append(models.
                                LoadedCertificate(resource_id=certificate_resource_id,
                                                  load_trust_store=load_trust_store))
 
@@ -1835,7 +1835,7 @@ def storage_list_persistent_storage(client, resource_group, service, name):
     return reference_apps
 
 
-def certificate_add(cmd, client, resource_group, service, name, only_public_cert=None,
+def certificate_add(cmd, client, resource_group, service, name, models=None, only_public_cert=None,
                     vault_uri=None, vault_certificate_name=None, public_certificate_file=None):
     if vault_uri is None and public_certificate_file is None:
         raise InvalidArgumentValueError("One of --vault-uri and --public-certificate-file should be provided")
@@ -1848,7 +1848,7 @@ def certificate_add(cmd, client, resource_group, service, name, only_public_cert
     if vault_uri is not None:
         if only_public_cert is None:
             only_public_cert = False
-        properties = models_20210901preview.KeyVaultCertificateProperties(
+        properties = models.KeyVaultCertificateProperties(
             type="KeyVaultCertificate",
             vault_uri=vault_uri,
             key_vault_cert_name=vault_certificate_name,
@@ -1864,14 +1864,14 @@ def certificate_add(cmd, client, resource_group, service, name, only_public_cert
                 raise FileOperationError('Failed to decode file {} - unknown decoding'.format(public_certificate_file))
         else:
             raise FileOperationError("public_certificate_file %s could not be found", public_certificate_file)
-        properties = models_20210901preview.ContentCertificateProperties(
+        properties = models.ContentCertificateProperties(
             type="ContentCertificate",
             content=content
         )
-    certificate_resource = models_20210901preview.CertificateResource(properties=properties)
+    certificate_resource = models.CertificateResource(properties=properties)
 
     def callback(pipeline_response, deserialized, headers):
-        return models_20210901preview.CertificateResource.deserialize(json.loads(pipeline_response.http_response.text()))
+        return models.CertificateResource.deserialize(json.loads(pipeline_response.http_response.text()))
 
     return client.certificates.begin_create_or_update(
         resource_group_name=resource_group,
@@ -1920,7 +1920,7 @@ def certificate_list_reference_app(cmd, client, resource_group, service, name):
     return reference_apps
 
 
-def domain_bind(cmd, client, resource_group, service, app,
+def app_domain_bind(cmd, client, models, resource_group, service, app,
                 domain_name,
                 certificate=None,
                 enable_end_to_end_tls=None):
@@ -1956,17 +1956,17 @@ def _update_app_e2e_tls(cmd, resource_group, service, app, enable_end_to_end_tls
     return poller.result()
 
 
-def domain_show(cmd, client, resource_group, service, app, domain_name):
+def app_domain_show(cmd, client, resource_group, service, app, domain_name):
     _check_active_deployment_exist(client, resource_group, service, app)
     return client.custom_domains.get(resource_group, service, app, domain_name)
 
 
-def domain_list(cmd, client, resource_group, service, app):
+def app_domain_list(cmd, client, resource_group, service, app):
     _check_active_deployment_exist(client, resource_group, service, app)
     return client.custom_domains.list(resource_group, service, app)
 
 
-def domain_update(cmd, client, resource_group, service, app,
+def app_domain_update(cmd, client, models, resource_group, service, app,
                   domain_name,
                   certificate=None,
                   enable_end_to_end_tls=None):
@@ -1986,7 +1986,7 @@ def domain_update(cmd, client, resource_group, service, app,
                                                         domain_name, custom_domain_resource)
 
 
-def domain_unbind(cmd, client, resource_group, service, app, domain_name):
+def app_domain_unbind(cmd, client, resource_group, service, app, domain_name):
     client.custom_domains.get(resource_group, service, app, domain_name)
     return client.custom_domains.begin_delete(resource_group, service, app, domain_name)
 

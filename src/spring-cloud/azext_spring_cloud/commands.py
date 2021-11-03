@@ -33,6 +33,11 @@ def load_command_table(self, _):
         client_factory=cf_spring_cloud_20210901preview
     )
 
+    certificate_routing_util = CliCommandType(
+        operations_tmpl='azext_spring_cloud.tier_routing_certificate#{}',
+        client_factory=cf_spring_cloud_20210901preview
+    )
+
     service_registry_cmd_group = CliCommandType(
         operations_tmpl='azext_spring_cloud.service_registry#{}',
         client_factory=cf_spring_cloud_enterprise
@@ -93,6 +98,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'app_start', supports_no_wait=True)
         g.custom_command('stop', 'app_stop', supports_no_wait=True)
         g.custom_command('restart', 'app_restart', supports_no_wait=True)
+        g.custom_command('append-loaded-public-certificate', 'app_append_loaded_public_certificate')
 
     with self.command_group('spring-cloud app', client_factory=cf_spring_cloud_20210601preview,
                             exception_handler=handle_asc_exception) as g:
@@ -103,7 +109,6 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.custom_command('logs', 'app_tail_log')
         g.custom_command('append-persistent-storage', 'app_append_persistent_storage')
-        g.custom_command('append-loaded-public-certificate', 'app_append_loaded_public_certificate')
 
     with self.command_group('spring-cloud app identity', custom_command_type=app_routing_util,
                             exception_handler=handle_asc_exception) as g:
@@ -149,7 +154,7 @@ def load_command_table(self, _):
         g.custom_command('remove', 'storage_remove')
         g.custom_command('list-persistent-storage', "storage_list_persistent_storage", table_transformer=transform_app_table_output)
 
-    with self.command_group('spring-cloud certificate', client_factory=cf_spring_cloud_20210901preview,
+    with self.command_group('spring-cloud certificate', custom_command_type=certificate_routing_util,
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('add', 'certificate_add')
         g.custom_show_command('show', 'certificate_show', table_transformer=transform_spring_cloud_certificate_output)
@@ -157,13 +162,13 @@ def load_command_table(self, _):
         g.custom_command('remove', 'certificate_remove')
         g.custom_command('list-reference-app', 'certificate_list_reference_app', table_transformer=transform_app_table_output)
 
-    with self.command_group('spring-cloud app custom-domain', client_factory=cf_spring_cloud,
+    with self.command_group('spring-cloud app custom-domain', custom_command_type=app_routing_util,
                             exception_handler=handle_asc_exception) as g:
-        g.custom_command('bind', 'domain_bind')
-        g.custom_show_command('show', 'domain_show', table_transformer=transform_spring_cloud_custom_domain_output)
-        g.custom_command('list', 'domain_list', table_transformer=transform_spring_cloud_custom_domain_output)
-        g.custom_command('update', 'domain_update')
-        g.custom_command('unbind', 'domain_unbind')
+        g.custom_command('bind', 'app_domain_bind')
+        g.custom_show_command('show', 'app_domain_show', table_transformer=transform_spring_cloud_custom_domain_output)
+        g.custom_command('list', 'app_domain_list', table_transformer=transform_spring_cloud_custom_domain_output)
+        g.custom_command('update', 'app_domain_update')
+        g.custom_command('unbind', 'app_domain_unbind')
 
     with self.command_group('spring-cloud app-insights',
                             client_factory=cf_spring_cloud_20201101preview,

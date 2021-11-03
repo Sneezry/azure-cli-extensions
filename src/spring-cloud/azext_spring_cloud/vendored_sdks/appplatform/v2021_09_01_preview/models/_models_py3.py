@@ -332,8 +332,8 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
     :type type: str
     :param mount_path: Required. The mount path of the persistent disk.
     :type mount_path: str
-    :param read_only: Indicates whether the persistent disk is a readOnly one.
-    :type read_only: bool
+    :param readonly: Indicates whether the persistent disk is a readonly one.
+    :type readonly: bool
     :param mount_options: These are the mount options for a persistent disk.
     :type mount_options: list[str]
     """
@@ -346,7 +346,7 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
         'mount_path': {'key': 'mountPath', 'type': 'str'},
-        'read_only': {'key': 'readOnly', 'type': 'bool'},
+        'readonly': {'key': 'readonly', 'type': 'bool'},
         'mount_options': {'key': 'mountOptions', 'type': '[str]'},
     }
 
@@ -358,14 +358,14 @@ class CustomPersistentDiskProperties(msrest.serialization.Model):
         self,
         *,
         mount_path: str,
-        read_only: Optional[bool] = None,
+        readonly: Optional[bool] = None,
         mount_options: Optional[List[str]] = None,
         **kwargs
     ):
         super(CustomPersistentDiskProperties, self).__init__(**kwargs)
         self.type = None  # type: Optional[str]
         self.mount_path = mount_path
-        self.read_only = read_only
+        self.readonly = readonly
         self.mount_options = mount_options
 
 
@@ -379,8 +379,8 @@ class AzureFileVolume(CustomPersistentDiskProperties):
     :type type: str
     :param mount_path: Required. The mount path of the persistent disk.
     :type mount_path: str
-    :param read_only: Indicates whether the persistent disk is a readOnly one.
-    :type read_only: bool
+    :param readonly: Indicates whether the persistent disk is a readonly one.
+    :type readonly: bool
     :param mount_options: These are the mount options for a persistent disk.
     :type mount_options: list[str]
     :param share_name: Required. The share name of the Azure File share.
@@ -396,7 +396,7 @@ class AzureFileVolume(CustomPersistentDiskProperties):
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
         'mount_path': {'key': 'mountPath', 'type': 'str'},
-        'read_only': {'key': 'readOnly', 'type': 'bool'},
+        'readonly': {'key': 'readonly', 'type': 'bool'},
         'mount_options': {'key': 'mountOptions', 'type': '[str]'},
         'share_name': {'key': 'shareName', 'type': 'str'},
     }
@@ -406,11 +406,11 @@ class AzureFileVolume(CustomPersistentDiskProperties):
         *,
         mount_path: str,
         share_name: str,
-        read_only: Optional[bool] = None,
+        readonly: Optional[bool] = None,
         mount_options: Optional[List[str]] = None,
         **kwargs
     ):
-        super(AzureFileVolume, self).__init__(mount_path=mount_path, read_only=read_only, mount_options=mount_options, **kwargs)
+        super(AzureFileVolume, self).__init__(mount_path=mount_path, readonly=readonly, mount_options=mount_options, **kwargs)
         self.type = 'AzureFileVolume'  # type: str
         self.share_name = share_name
 
