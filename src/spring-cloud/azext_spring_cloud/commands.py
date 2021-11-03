@@ -25,12 +25,12 @@ from ._transformers import (transform_spring_cloud_table_output,
 def load_command_table(self, _):
     app_routing_util = CliCommandType(
         operations_tmpl='azext_spring_cloud.tier_routing_app#{}',
-        client_factory=cf_spring_cloud_20210601preview
+        client_factory=cf_spring_cloud_20210901preview
     )
 
     deployment_routing_util = CliCommandType(
         operations_tmpl='azext_spring_cloud.tier_routing_deployment#{}',
-        client_factory=cf_spring_cloud_20210601preview
+        client_factory=cf_spring_cloud_20210901preview
     )
 
     service_registry_cmd_group = CliCommandType(
