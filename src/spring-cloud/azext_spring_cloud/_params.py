@@ -14,9 +14,17 @@ from ._validators import (validate_env, validate_cosmos_type, validate_resource_
                           validate_tracing_parameters_asc_create, validate_tracing_parameters_asc_update,
                           validate_app_insights_parameters, validate_instance_count, validate_java_agent_parameters,
                           validate_jar)
+from ._validators_enterprise import (validate_config_file_patterns, validate_cpu, validate_memory,
+                                     validate_buildpacks_binding_properties,
+                                     validate_buildpacks_binding_secrets, only_support_enterprise,
+                                     validate_buildpacks_binding_not_exist, validate_buildpacks_binding_exist,
+                                     validate_git_uri, validate_acs_patterns)
 from ._utils import ApiType
 
 from .vendored_sdks.appplatform.v2020_07_01.models import RuntimeVersion, TestKeyType
+from .vendored_sdks.appplatform.v2022_05_01_preview.models \
+    import _app_platform_management_client_enums as v20220501_preview_AppPlatformEnums
+
 
 name_type = CLIArgumentType(options_list=[
     '--name', '-n'], help='The primary resource name', validator=validate_name)
@@ -114,9 +122,11 @@ def load_arguments(self, _):
         c.argument('assign_identity', arg_type=get_three_state_flag(),
                    help='If true, assign managed service identity.')
         c.argument('cpu', type=str, default="1",
-                   help='CPU resource quantity. Should be 500m or number of CPU cores.')
+                   help='CPU resource quantity. Should be 500m or number of CPU cores.',
+                   validator=validate_cpu)
         c.argument('memory', type=str, default="1Gi",
-                   help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.')
+                   help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.',
+                   validator=validate_memory)
         c.argument('instance_count', type=int,
                    default=1, help='Number of instance.', validator=validate_instance_count)
         c.argument('persistent_storage', type=str,
@@ -192,9 +202,15 @@ def load_arguments(self, _):
                        help="A string containing jvm options, use '=' instead of ' ' for this argument to avoid bash parse error, eg: --jvm-options='-Xms1024m -Xmx2048m'")
             c.argument('env', env_type)
 
+    for scope in ['spring-cloud app update', 'spring-cloud app deployment create', 'spring-cloud app deploy']:
+        with self.argument_context(scope) as c:
+            c.argument('config_file_patterns', type=str,
+                    help="Only support in enterprise tier now. Config file patterns separated with \',\' to decide which patterns of Application Configuration Service will be used. Use '\"\"' to clear existing configurations.",
+                    validator=validate_config_file_patterns)
+
     with self.argument_context('spring-cloud app scale') as c:
-        c.argument('cpu', type=str, help='CPU resource quantity. Should be 500m or number of CPU cores.')
-        c.argument('memory', type=str, help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.')
+        c.argument('cpu', type=str, help='CPU resource quantity. Should be 500m or number of CPU cores.', validator=validate_cpu)
+        c.argument('memory', type=str, help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.', validator=validate_memory)
         c.argument('instance_count', type=int, help='Number of instance.', validator=validate_instance_count)
 
     for scope in ['spring-cloud app deploy', 'spring-cloud app deployment create']:
@@ -214,6 +230,8 @@ def load_arguments(self, _):
                 'main_entry', options_list=[
                     '--main-entry', '-m'], help="A string containing the path to the .NET executable relative to zip root.")
             c.argument(
+                'builder', help="The name of builder.", default="default")
+            c.argument(
                 'target_module', help='Child module to be deployed, required for multiple jar packages built from source code.')
             c.argument(
                 'version', help='Deployment version, keep unchanged if not set.')
@@ -221,8 +239,8 @@ def load_arguments(self, _):
     with self.argument_context('spring-cloud app deployment create') as c:
         c.argument('skip_clone_settings', help='Create staging deployment will automatically copy settings from production deployment.',
                    action='store_true')
-        c.argument('cpu', type=str, help='CPU resource quantity. Should be 500m or number of CPU cores.')
-        c.argument('memory', type=str, help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.')
+        c.argument('cpu', type=str, help='CPU resource quantity. Should be 500m or number of CPU cores.', validator=validate_cpu)
+        c.argument('memory', type=str, help='Memory resource quantity. Should be 512Mi or #Gi, e.g., 1Gi, 3Gi.', validator=validate_memory)
         c.argument('instance_count', type=int, help='Number of instance.', validator=validate_instance_count)
 
     with self.argument_context('spring-cloud app deployment') as c:
@@ -379,3 +397,73 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(),
                    help="Disable Application Insights.",
                    validator=validate_app_insights_parameters)
+
+    for scope in ['spring-cloud application-configuration-service', 'spring-cloud service-registry']:
+        with self.argument_context(scope) as c:
+            c.argument('service', service_name_type, validator=only_support_enterprise)
+
+    with self.argument_context('spring-cloud service-registry bind') as c:
+        c.argument('app', app_name_type, help='Name of app.', validator=validate_app_name)
+
+    with self.argument_context('spring-cloud service-registry unbind') as c:
+        c.argument('app', app_name_type, help='Name of app.', validator=validate_app_name)
+
+    with self.argument_context('spring-cloud application-configuration-service bind') as c:
+        c.argument('app', app_name_type, help='Name of app.', validator=validate_app_name)
+
+    with self.argument_context('spring-cloud application-configuration-service unbind') as c:
+        c.argument('app', app_name_type, help='Name of app.', validator=validate_app_name)
+
+    for scope in ['spring-cloud application-configuration-service git repo add',
+                  'spring-cloud application-configuration-service git repo update']:
+        with self.argument_context(scope) as c:
+            c.argument('patterns',
+                        help="Required patterns used to search in Git repositories. For each pattern, use format like {application} or {application}/{profile} instead of {application}-{profile}.yml, and separate them by comma.",
+                        validator=validate_acs_patterns),
+            c.argument('uri', help="Required Git URI.", validator=validate_git_uri),
+            c.argument('label', help="Required branch name to search in the Git repository."),
+            c.argument('search_paths', help='search_paths of the added config, use , as delimiter for multiple paths.')
+            c.argument('username', help='Username of the added config.')
+            c.argument('password', help='Password of the added config.')
+            c.argument('host_key', help='Host key of the added config.')
+            c.argument('host_key_algorithm', help='Host key algorithm of the added config.')
+            c.argument('private_key', help='Private_key of the added config.')
+            c.argument('strict_host_key_checking', help='Strict_host_key_checking of the added config.')
+
+    for scope in ['spring-cloud application-configuration-service git repo add',
+                  'spring-cloud application-configuration-service git repo update',
+                  'spring-cloud application-configuration-service git repo remove']:
+        with self.argument_context(scope) as c:
+            c.argument('name', help="Required unique name to label each item of git configs.")
+
+    for scope in ['spring-cloud build-service buildpacks-binding create',
+                  'spring-cloud build-service buildpacks-binding set']:
+        with self.argument_context(scope) as c:
+            c.argument('type',
+                       arg_type=get_enum_type(v20220501_preview_AppPlatformEnums.BindingType),
+                       help='Required type for buildpacks binding.')
+            c.argument('properties',
+                       help='Non-sensitive properties for launchProperties. Format "key[=value]".',
+                       nargs='*',
+                       validator=validate_buildpacks_binding_properties)
+            c.argument('secrets',
+                       help='Sensitive properties for launchProperties. '
+                            'Once put, it will be encrypted and never return to user. '
+                            'Format "key[=value]".',
+                       nargs='*',
+                       validator=validate_buildpacks_binding_secrets)
+
+    for scope in ['spring-cloud build-service buildpacks-binding create']:
+        with self.argument_context(scope) as c:
+            c.argument('name', help='Name for buildpacks binding.', validator=validate_buildpacks_binding_not_exist)
+
+    for scope in ['spring-cloud build-service buildpacks-binding set']:
+        with self.argument_context(scope) as c:
+            c.argument('name', help='Name for buildpacks binding.', validator=validate_buildpacks_binding_exist)
+
+    for scope in ['spring-cloud build-service buildpacks-binding create',
+                  'spring-cloud build-service buildpacks-binding set',
+                  'spring-cloud build-service buildpacks-binding show',
+                  'spring-cloud build-service buildpacks-binding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('service', service_name_type, validator=only_support_enterprise)

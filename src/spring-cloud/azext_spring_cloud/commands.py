@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from azure.cli.core.commands import CliCommandType
 from azext_spring_cloud._utils import handle_asc_exception
 
 from ._client_factory import (cf_app_services,
@@ -11,6 +12,7 @@ from ._client_factory import (cf_app_services,
                               cf_spring_cloud_20201101preview,
                               cf_spring_cloud_20210601preview,
                               cf_spring_cloud_20210901preview,
+                              cf_spring_cloud_enterprise,
                               cf_config_servers)
 from ._transformers import (transform_spring_cloud_table_output,
                             transform_app_table_output,
@@ -21,6 +23,31 @@ from ._transformers import (transform_spring_cloud_table_output,
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
+    app_routing_util = CliCommandType(
+        operations_tmpl='azext_spring_cloud.tier_routing_app#{}',
+        client_factory=cf_spring_cloud_20210601preview
+    )
+
+    deployment_routing_util = CliCommandType(
+        operations_tmpl='azext_spring_cloud.tier_routing_deployment#{}',
+        client_factory=cf_spring_cloud_20210601preview
+    )
+
+    service_registry_cmd_group = CliCommandType(
+        operations_tmpl='azext_spring_cloud.service_registry#{}',
+        client_factory=cf_spring_cloud_enterprise
+    )
+
+    application_configuration_service_cmd_group = CliCommandType(
+        operations_tmpl='azext_spring_cloud.application_configuration_service#{}',
+        client_factory=cf_spring_cloud_enterprise
+    )
+
+    buildpacks_binding_cmd_group = CliCommandType(
+        operations_tmpl="azext_spring_cloud.buildpacks_binding#{}",
+        client_factory=cf_spring_cloud_enterprise
+    )
+
     with self.command_group('spring-cloud', client_factory=cf_app_services,
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('create', 'spring_cloud_create', supports_no_wait=True, client_factory=cf_spring_cloud)
@@ -52,17 +79,12 @@ def load_command_table(self, _):
         g.custom_command('repo update', 'config_repo_update')
         g.custom_command('repo list', 'config_repo_list')
 
-    with self.command_group('spring-cloud app', client_factory=cf_spring_cloud_20210901preview,
+    with self.command_group('spring-cloud app', custom_command_type=app_routing_util,
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('create', 'app_create')
         g.custom_command('update', 'app_update')
         g.custom_command('deploy', 'app_deploy', supports_no_wait=True)
         g.custom_command('scale', 'app_scale', supports_no_wait=True)
-        g.custom_command('show-deploy-log', 'app_get_build_log')
-        g.custom_command('set-deployment', 'app_set_deployment',
-                         supports_no_wait=True)
-        g.custom_command('unset-deployment', 'app_unset_deployment',
-                         supports_no_wait=True)
         g.custom_command('delete', 'app_delete')
         g.custom_command('list', 'app_list',
                          table_transformer=transform_app_table_output)
@@ -71,11 +93,19 @@ def load_command_table(self, _):
         g.custom_command('start', 'app_start', supports_no_wait=True)
         g.custom_command('stop', 'app_stop', supports_no_wait=True)
         g.custom_command('restart', 'app_restart', supports_no_wait=True)
+
+    with self.command_group('spring-cloud app', client_factory=cf_spring_cloud_20210601preview,
+                            exception_handler=handle_asc_exception) as g:
+        g.custom_command('show-deploy-log', 'app_get_build_log')
+        g.custom_command('set-deployment', 'app_set_deployment',
+                         supports_no_wait=True)
+        g.custom_command('unset-deployment', 'app_unset_deployment',
+                         supports_no_wait=True)
         g.custom_command('logs', 'app_tail_log')
         g.custom_command('append-persistent-storage', 'app_append_persistent_storage')
         g.custom_command('append-loaded-public-certificate', 'app_append_loaded_public_certificate')
 
-    with self.command_group('spring-cloud app identity', client_factory=cf_spring_cloud,
+    with self.command_group('spring-cloud app identity', custom_command_type=app_routing_util,
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('assign', 'app_identity_assign')
         g.custom_command('remove', 'app_identity_remove')
@@ -86,7 +116,7 @@ def load_command_table(self, _):
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('tail', 'app_tail_log')
 
-    with self.command_group('spring-cloud app deployment', client_factory=cf_spring_cloud_20210901preview,
+    with self.command_group('spring-cloud app deployment', custom_command_type=deployment_routing_util,
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('create', 'deployment_create', supports_no_wait=True)
         g.custom_command('list', 'deployment_list',
@@ -140,6 +170,38 @@ def load_command_table(self, _):
                             exception_handler=handle_asc_exception) as g:
         g.custom_command('update', 'app_insights_update', supports_no_wait=True)
         g.custom_show_command('show', 'app_insights_show')
+
+    with self.command_group('spring-cloud service-registry',
+                            custom_command_type=service_registry_cmd_group,
+                            exception_handler=handle_asc_exception) as g:
+        g.custom_command('show', 'service_registry_show')
+        g.custom_command('bind', 'service_registry_bind')
+        g.custom_command('unbind', 'service_registry_unbind')
+
+    with self.command_group('spring-cloud application-configuration-service',
+                            custom_command_type=application_configuration_service_cmd_group,
+                            exception_handler=handle_asc_exception) as g:
+        g.custom_command('clear', 'application_configuration_service_clear')
+        g.custom_command('show', 'application_configuration_service_show')
+        g.custom_command('bind', 'application_configuration_service_bind')
+        g.custom_command('unbind', 'application_configuration_service_unbind')
+
+    with self.command_group('spring-cloud application-configuration-service git repo',
+                            custom_command_type=application_configuration_service_cmd_group,
+                            exception_handler=handle_asc_exception) as g:
+        g.custom_command('add', 'application_configuration_service_git_add')
+        g.custom_command('update', 'application_configuration_service_git_update')
+        g.custom_command('remove', 'application_configuration_service_git_remove')
+        g.custom_command('list', 'application_configuration_service_git_list')
+
+    with self.command_group('spring-cloud build-service buildpacks-binding',
+                            custom_command_type=buildpacks_binding_cmd_group,
+                            exception_handler=handle_asc_exception) as g:
+        # create and set commands are differentiate by their parameter validators
+        g.custom_command('create', 'create_or_update_buildpacks_binding')
+        g.custom_command('set', 'create_or_update_buildpacks_binding')
+        g.custom_command('show', 'buildpacks_binding_show')
+        g.custom_command('delete', 'buildpacks_binding_delete')
 
     with self.command_group('spring-cloud', exception_handler=handle_asc_exception):
         pass

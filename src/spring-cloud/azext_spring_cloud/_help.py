@@ -568,3 +568,122 @@ helps['spring-cloud app-insights update'] = """
         - name: Disable Application Insights.
           text: az spring-cloud app-insights update -n MyService -g MyResourceGroup --disable
 """
+
+helps['spring-cloud service-registry show'] = """
+    type: command
+    short-summary: Show the provisioning status and runtime status of Service Registry.
+"""
+
+helps['spring-cloud service-registry bind'] = """
+    type: command
+    short-summary: Bind an app to Service Registry.
+    examples:
+        - name: Bind an app to Service Registry.
+          text: az spring-cloud service-registry bind --app MyApp -s MyService -g MyResourceGroup
+"""
+
+helps['spring-cloud service-registry unbind'] = """
+    type: command
+    short-summary: Unbind an app from Service Registry.
+    examples:
+        - name: Unbind an app from Service Registry.
+          text: az spring-cloud service-registry unbind --app MyApp -s MyService -g MyResourceGroup
+"""
+
+helps['spring-cloud application-configuration-service show'] = """
+    type: command
+    short-summary: Show the provisioning status, runtime status, and settings of Application Configuration Service.
+"""
+
+helps['spring-cloud application-configuration-service clear'] = """
+    type: command
+    short-summary: Reset all Application Configuration Service settings.
+"""
+
+helps['spring-cloud application-configuration-service git repo add'] = """
+    type: command
+    short-summary: Add a Git property to the Application Configuration Service settings.
+    examples:
+        - name: Add a Git property.
+          text: az spring-cloud application-configuration-service git repo add -s MyService -g MyResourceGroup --name MyName --patterns MyPattern --uri https://MyURI --label master
+"""
+
+helps['spring-cloud application-configuration-service git repo update'] = """
+    type: command
+    short-summary: Update an existing Git property in the Application Configuration Service settings.
+    examples:
+        - name: Update a Git property.
+          text: az spring-cloud application-configuration-service git repo update -s MyService -g MyResourceGroup --name MyName --patterns MyPattern
+"""
+
+helps['spring-cloud application-configuration-service git repo remove'] = """
+    type: command
+    short-summary: Delete an existing Git property from the Application Configuration Service settings.
+    examples:
+        - name: Delete a Git property.
+          text: az spring-cloud application-configuration-service git repo remove -s MyService -g MyResourceGroup --name MyName
+"""
+
+helps['spring-cloud application-configuration-service git repo list'] = """
+    type: command
+    short-summary: List all Git settings of Application Configuration Service.
+"""
+
+helps['spring-cloud application-configuration-service bind'] = """
+    type: command
+    short-summary: Bind an app to Application Configuration Service.
+    examples:
+        - name: Bind an app to Application Configuration Service.
+          text: az spring-cloud application-configuration-service bind --app MyApp -s MyService -g MyResourceGroup
+"""
+
+helps['spring-cloud application-configuration-service unbind'] = """
+    type: command
+    short-summary: Unbind an app from Application Configuration Service.
+    examples:
+        - name: Unbind an app from Application Configuration Service.
+          text: az spring-cloud application-configuration-service unbind --app MyApp -s MyService -g MyResourceGroup
+"""
+
+helps['spring-cloud build-service buildpacks-binding'] = """
+    type: group
+    short-summary: (Enterprise Tier Only) Commands to manage Buildpacks Binding
+"""
+
+helps['spring-cloud build-service buildpacks-binding create'] = """
+    type: command
+    short-summary: Create a buildpacks binding.
+    examples:
+        - name: Create a buildpacks binding without properties or secrets.
+          text: az spring-cloud build-service buildpacks-binding create --name first-binding --type ApplicationInsights
+        - name: Create a buildpacks binding with only secrets.
+          text: az spring-cloud build-service buildpacks-binding create --name first-binding --type ApplicationInsights --secrets k1=v1 k2=v2
+        - name: Create a buildpacks binding with only properties.
+          text: az spring-cloud build-service buildpacks-binding create --name first-binding --type ApplicationInsights --properties a=b c=d
+        - name: Create a buildpacks binding with properties and secrets.
+          text: az spring-cloud build-service buildpacks-binding create --name first-binding --type ApplicationInsights --properties a=b c=d --secrets k1=v1 k2=v2
+"""
+
+helps['spring-cloud build-service buildpacks-binding set'] = """
+    type: command
+    short-summary: Set a buildpacks binding.
+    examples:
+        - name: Set a buildpacks binding with properties and secrets.
+          text: az spring-cloud build-service buildpacks-binding set --name first-binding --type ApplicationInsights --properties a=b c=d --secrets k1=v1 k2=v2
+"""
+
+helps['spring-cloud build-service buildpacks-binding show'] = """
+    type: command
+    short-summary: Show a buildpacks binding. The secrets will be masked.
+    examples:
+        - name: Show a buildpacks binding.
+          text: az spring-cloud build-service buildpacks-binding show --name first-binding
+"""
+
+helps['spring-cloud build-service buildpacks-binding delete'] = """
+    type: command
+    short-summary: Delete a buildpacks binding.
+    examples:
+        - name: Delete a buildpacks binding.
+          text: az spring-cloud build-service buildpacks-binding delete --name first-binding
+"""
